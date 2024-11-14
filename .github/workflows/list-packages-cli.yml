@@ -8,6 +8,8 @@ jobs:
   get_packages_list:
     name: Print list of packages
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: get names via cli
         id: set-matrix
