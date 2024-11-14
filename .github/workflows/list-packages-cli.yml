@@ -1,4 +1,4 @@
-name: List packages list
+name: List packages list cli
 
 on:
   pull_request:
@@ -9,9 +9,8 @@ jobs:
     name: Print list of packages
     runs-on: ubuntu-latest
     steps:
-      - name: get names via crul
+      - name: get names via cli
         id: set-matrix
-        env: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo $(gh api \
           -H "Accept: application/vnd.github+json" \

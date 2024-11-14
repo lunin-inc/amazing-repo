@@ -1,4 +1,4 @@
-name: List packages list
+name: List packages list curl
 
 on:
   pull_request:
@@ -9,10 +9,9 @@ jobs:
     name: Print list of packages
     runs-on: ubuntu-latest
     steps:
-      - name: get names via crul
+      - name: get names via curl
         id: set-matrix
-        env: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo $(curl -s --request GET \
           --url "https://api.github.com/orgs/lunin-inc/packages?package_type=container" \
-          --header "Authorization: Bearer $GH_TOKEN")
+          --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}")
