@@ -37,11 +37,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker 1st image
+      - name: Extract metadata (tags, labels) for Docker 0th image
         id: meta0
         uses: docker/metadata-action@v5.5.1
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_1 }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_0 }}
 
       - name: Build and push 0th Docker image
         uses: docker/build-push-action@v6.9.0
