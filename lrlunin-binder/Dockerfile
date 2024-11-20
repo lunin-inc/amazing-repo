@@ -26,5 +26,3 @@ RUN pip install --no-cache-dir mrpro \
     black && \ 
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
