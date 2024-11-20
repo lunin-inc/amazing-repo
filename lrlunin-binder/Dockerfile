@@ -19,43 +19,12 @@ RUN apt-get update --yes && \
     gcc && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Julia dependencies
-# install Julia packages in /opt/julia instead of ${HOME}
-ENV JULIA_DEPOT_PATH=/opt/julia \
-    JULIA_PKGDIR=/opt/julia
-
-# Setup Julia
-RUN /opt/setup-scripts/setup_julia.py
 
 USER ${NB_UID}
 
-# Setup IJulia kernel & other packages
-RUN /opt/setup-scripts/setup-julia-packages.bash
-
-# R packages including IRKernel which gets installed globally.
-# r-e1071: dependency of the caret R package
-RUN mamba install --yes \
-    'r-base' \
-    'r-caret' \
-    'r-crayon' \
-    'r-devtools' \
-    'r-e1071' \
-    'r-forecast' \
-    'r-hexbin' \
-    'r-htmltools' \
-    'r-htmlwidgets' \
-    'r-irkernel' \
-    'r-nycflights13' \
-    'r-randomforest' \
-    'r-rcurl' \
-    'r-rmarkdown' \
-    'r-rodbc' \
-    'r-rsqlite' \
-    'r-shiny' \
-    'r-tidymodels' \
-    'r-tidyverse' \
-    'rpy2' \
-    'unixodbc' && \
-    mamba clean --all -f -y && \
+RUN pip install --no-cache-dir mrpro \
+    black && \ 
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"

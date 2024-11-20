@@ -37,20 +37,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Extract metadata (tags, labels) for Docker 0th image
-      #   id: meta0
-      #   uses: docker/metadata-action@v5.5.1
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_0 }}
+      - name: Extract metadata (tags, labels) for Docker 0th image
+        id: meta0
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_0 }}
 
-      # - name: Build and push 0th Docker image
-      #   uses: docker/build-push-action@v6.9.0
-      #   with:
-      #     context: ${{ env.IMAGE_NAME_0 }}
-      #     file: ${{ env.IMAGE_NAME_0 }}/Dockerfile
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     tags: ${{ steps.meta0.outputs.tags }}
-      #     labels: ${{ steps.meta0.outputs.labels }}
+      - name: Build and push 0th Docker image
+        uses: docker/build-push-action@v6.9.0
+        with:
+          context: ${{ env.IMAGE_NAME_0 }}
+          file: ${{ env.IMAGE_NAME_0 }}/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta0.outputs.tags }}
+          labels: ${{ steps.meta0.outputs.labels }}
 
       # - name: Extract metadata (tags, labels) for Docker 1st image
       #   id: meta1
