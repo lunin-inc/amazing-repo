@@ -30,62 +30,16 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Overwrite existing .dockerignore
+        run: |
+          echo "*" > .dockerignore
+          echo "!examples/*.ipynb" >> .dockerignore
 
-      # - name: Extract metadata (tags, labels) for Docker 0th image
-      #   id: meta0
-      #   uses: docker/metadata-action@v5.5.1
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_0 }}
-
-      # - name: Build and push 0th Docker image
-      #   uses: docker/build-push-action@v6.9.0
-      #   with:
-      #     context: ${{ env.IMAGE_NAME_0 }}
-      #     file: ${{ env.IMAGE_NAME_0 }}/Dockerfile
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     tags: ${{ steps.meta0.outputs.tags }}
-      #     labels: ${{ steps.meta0.outputs.labels }}
-
-      # - name: Extract metadata (tags, labels) for Docker 1st image
-      #   id: meta1
-      #   uses: docker/metadata-action@v5.5.1
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_1 }}
-
-      # - name: Build and push 1st Docker image
-      #   uses: docker/build-push-action@v6.9.0
-      #   with:
-      #     context: ${{ env.IMAGE_NAME_1 }}
-      #     file: ${{ env.IMAGE_NAME_1 }}/Dockerfile
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     tags: ${{ steps.meta1.outputs.tags }}
-      #     labels: ${{ steps.meta1.outputs.labels }}
-
-      # - name: Extract metadata (tags, labels) for Docker 2nd image
-      #   id: meta2
-      #   uses: docker/metadata-action@v5.5.1
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_2 }}
-
-      # - name: Build and push 2nd Docker image
-      #   uses: docker/build-push-action@v6.9.0
-      #   with:
-      #     context: ${{ env.IMAGE_NAME_2 }}
-      #     file: ${{ env.IMAGE_NAME_2 }}/Dockerfile
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     tags: ${{ steps.meta2.outputs.tags }}
-      #     labels: ${{ steps.meta2.outputs.labels }}
-
-      - name: cache binder build on mybinder.org
+      - name: Build binder and cache on mybinder.org
         uses: jupyterhub/repo2docker-action@master
         with:
           BINDER_CACHE: true
+          REPO_DIR: /home/joyvan/examples
           DOCKER_REGISTRY: ghcr.io
           DOCKER_USERNAME: ${{ github.actor }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
