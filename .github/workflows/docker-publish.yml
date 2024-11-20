@@ -17,6 +17,7 @@ on:
 env:
   REGISTRY: ghcr.io
   REPO_NAME_LOWERCASE: lunin-inc
+  IMAGE_NAME_0: lrlunin-binder
   IMAGE_NAME_1: hello-world-lunin-1
   IMAGE_NAME_2: hello-world-lunin-2
 jobs:
@@ -38,6 +39,21 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker 1st image
+        id: meta0
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_1 }}
+
+      - name: Build and push 0th Docker image
+        uses: docker/build-push-action@v6.9.0
+        with:
+          context: ${{ env.IMAGE_NAME_0 }}
+          file: ${{ env.IMAGE_NAME_0 }}/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta0.outputs.tags }}
+          labels: ${{ steps.meta0.outputs.labels }}
+
+      - name: Extract metadata (tags, labels) for Docker 1st image
         id: meta1
         uses: docker/metadata-action@v5.5.1
         with:
@@ -51,6 +67,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta1.outputs.tags }}
           labels: ${{ steps.meta1.outputs.labels }}
+
       - name: Extract metadata (tags, labels) for Docker 2nd image
         id: meta2
         uses: docker/metadata-action@v5.5.1
@@ -65,3 +82,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta2.outputs.tags }}
           labels: ${{ steps.meta2.outputs.labels }}
+      
+      - name: cache binder build on mybinder.org
+        uses: jupyterhub/repo2docker-action@master
+        with:
+          NO_PUSH: true
+          BINDER_CACHE: true
+          MYBINDERORG_TAG: ${{ github.event.ref }} # This builds the container on mybinder.org with the branch that was pushed on.
+
