@@ -81,13 +81,14 @@ jobs:
       #     push: ${{ github.event_name != 'pull_request' }}
       #     tags: ${{ steps.meta2.outputs.tags }}
       #     labels: ${{ steps.meta2.outputs.labels }}
-      
+
       - name: cache binder build on mybinder.org
         uses: jupyterhub/repo2docker-action@master
         with:
-          NO_PUSH: true
           BINDER_CACHE: true
           DOCKER_REGISTRY: ghcr.io
-          IMAGE_NAME: lunin-inc/lrlunin-binder
+          DOCKER_USERNAME: ${{ github.actor }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_NAME: lunin-inc/lrlunin-mybinder
           MYBINDERORG_TAG: ${{ github.event.ref }} # This builds the container on mybinder.org with the branch that was pushed on.
 
