@@ -10,8 +10,7 @@
 name: Publish Docker image
 
 on:
-  release:
-    types: [published]
+  push:
   pull_request:
     branches: [ main ]
 env:
@@ -53,40 +52,41 @@ jobs:
           tags: ${{ steps.meta0.outputs.tags }}
           labels: ${{ steps.meta0.outputs.labels }}
 
-      - name: Extract metadata (tags, labels) for Docker 1st image
-        id: meta1
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_1 }}
+      # - name: Extract metadata (tags, labels) for Docker 1st image
+      #   id: meta1
+      #   uses: docker/metadata-action@v5.5.1
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_1 }}
 
-      - name: Build and push 1st Docker image
-        uses: docker/build-push-action@v6.9.0
-        with:
-          context: ${{ env.IMAGE_NAME_1 }}
-          file: ${{ env.IMAGE_NAME_1 }}/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta1.outputs.tags }}
-          labels: ${{ steps.meta1.outputs.labels }}
+      # - name: Build and push 1st Docker image
+      #   uses: docker/build-push-action@v6.9.0
+      #   with:
+      #     context: ${{ env.IMAGE_NAME_1 }}
+      #     file: ${{ env.IMAGE_NAME_1 }}/Dockerfile
+      #     push: ${{ github.event_name != 'pull_request' }}
+      #     tags: ${{ steps.meta1.outputs.tags }}
+      #     labels: ${{ steps.meta1.outputs.labels }}
 
-      - name: Extract metadata (tags, labels) for Docker 2nd image
-        id: meta2
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_2 }}
+      # - name: Extract metadata (tags, labels) for Docker 2nd image
+      #   id: meta2
+      #   uses: docker/metadata-action@v5.5.1
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_2 }}
 
-      - name: Build and push 2nd Docker image
-        uses: docker/build-push-action@v6.9.0
-        with:
-          context: ${{ env.IMAGE_NAME_2 }}
-          file: ${{ env.IMAGE_NAME_2 }}/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta2.outputs.tags }}
-          labels: ${{ steps.meta2.outputs.labels }}
+      # - name: Build and push 2nd Docker image
+      #   uses: docker/build-push-action@v6.9.0
+      #   with:
+      #     context: ${{ env.IMAGE_NAME_2 }}
+      #     file: ${{ env.IMAGE_NAME_2 }}/Dockerfile
+      #     push: ${{ github.event_name != 'pull_request' }}
+      #     tags: ${{ steps.meta2.outputs.tags }}
+      #     labels: ${{ steps.meta2.outputs.labels }}
       
       - name: cache binder build on mybinder.org
         uses: jupyterhub/repo2docker-action@master
         with:
           NO_PUSH: true
           BINDER_CACHE: true
+          IMAGE_NAME: lunin-inc/lrlunin-binder
           MYBINDERORG_TAG: ${{ github.event.ref }} # This builds the container on mybinder.org with the branch that was pushed on.
 
