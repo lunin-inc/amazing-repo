@@ -34,6 +34,7 @@ jobs:
         run: |
           echo "*" > .dockerignore
           echo "!examples/*.ipynb" >> .dockerignore
+          echo "!environment.yml" >> .dockerignore
 
       - name: Build binder and cache on mybinder.org
         uses: jupyterhub/repo2docker-action@master
