@@ -28,6 +28,12 @@ jobs:
          echo "$GITHUB_REPOSITORY"
          echo "$GITHUB_HEAD_REF"
          echo "$GITHUB_REF"
+     - name: generate working link
+       run: |
+        gh_repo=$GITHUB_REPOSITORY
+        gh_branch=${GITHUB_HEAD_REF:=$(basename $GITHUB_REF)}
+        echo "https://colab.research.google.com/github/$gh_repo/blob/$gh_branch/examples/direct_reconstruction.ipynb"
+        
   # push_to_registry:
   #   name: Push Docker image to GitHub Container Registry
   #   runs-on: ubuntu-latest
