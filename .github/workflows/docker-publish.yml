@@ -12,7 +12,6 @@ name: Publish Docker image
 on:
   push:
   pull_request:
-    branches: [ main ]
 env:
   REGISTRY: ghcr.io
   REPO_NAME_LOWERCASE: lunin-inc
@@ -20,30 +19,38 @@ env:
   IMAGE_NAME_1: hello-world-lunin-1
   IMAGE_NAME_2: hello-world-lunin-2
 jobs:
-  push_to_registry:
-    name: Push Docker image to GitHub Container Registry
+  test_links:
+    name: check refs
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: write
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
+     - name: print all info
+       run: |
+         echo "$GITHUB_REPOSITORY"
+         echo "$GITHUB_HEAD_REF"
+  # push_to_registry:
+  #   name: Push Docker image to GitHub Container Registry
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     packages: write
+  #     contents: write
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v4
 
-      - name: Overwrite existing .dockerignore
-        run: |
-          echo "*" > .dockerignore
-          echo "!examples/*.ipynb" >> .dockerignore
-          echo "!environment.yml" >> .dockerignore
+  #     - name: Overwrite existing .dockerignore
+  #       run: |
+  #         echo "*" > .dockerignore
+  #         echo "!examples/*.ipynb" >> .dockerignore
+  #         echo "!environment.yml" >> .dockerignore
 
-      - name: Build binder and cache on mybinder.org
-        uses: jupyterhub/repo2docker-action@master
-        with:
-          BINDER_CACHE: true
-          REPO_DIR: /home/joyvan/examples
-          DOCKER_REGISTRY: ghcr.io
-          DOCKER_USERNAME: ${{ github.actor }}
-          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_NAME: lunin-inc/lrlunin-mybinder
-          MYBINDERORG_TAG: ${{ github.event.ref }} # This builds the container on mybinder.org with the branch that was pushed on.
+  #     - name: Build binder and cache on mybinder.org
+  #       uses: jupyterhub/repo2docker-action@master
+  #       with:
+  #         BINDER_CACHE: true
+  #         REPO_DIR: /home/joyvan/examples
+  #         DOCKER_REGISTRY: ghcr.io
+  #         DOCKER_USERNAME: ${{ github.actor }}
+  #         DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  #         IMAGE_NAME: lunin-inc/lrlunin-mybinder
+  #         MYBINDERORG_TAG: ${{ github.event.ref }} # This builds the container on mybinder.org with the branch that was pushed on.
 
