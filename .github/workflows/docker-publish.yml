@@ -30,9 +30,17 @@ jobs:
          echo "$GITHUB_REF"
      - name: generate working link
        run: |
+        # like lunin-inc/amazing-repo
         gh_repo=$GITHUB_REPOSITORY
-        gh_branch=${GITHUB_HEAD_REF:=$(basename $GITHUB_REF)}
-        echo "https://colab.research.google.com/github/$gh_repo/blob/$gh_branch/examples/direct_reconstruction.ipynb"
+        # if push on main and head_ref is not empty - take the branch name
+        # if pull request - take the SHA of the commit (cannot reference other way)
+        gh_ref=""
+        if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            gh_ref=$GITHUB_SHA
+        elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            gh_ref=$(basename $GITHUB_REF)
+        fi
+        echo "https://colab.research.google.com/github/$gh_repo/blob/$gh_ref/examples/direct_reconstruction.ipynb"
         
   # push_to_registry:
   #   name: Push Docker image to GitHub Container Registry
