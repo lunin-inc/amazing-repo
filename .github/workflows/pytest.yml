@@ -22,7 +22,7 @@ jobs:
         id: set-matrix
         run: |
           # search for Dockerfile* in the docker directory, replace "Dockerfile" prefix with "mrpro" and to imagenames
-          imagenames="mrpro_py310 mrpro_py311 mrprpo_py312"
+          imagenames="mrpro_py310 mrpro_py311 mrpro_py312"
           echo "image names: $imagenames"
 
           imagenames_latest=()
@@ -47,9 +47,9 @@ jobs:
     name: Run Tests and Coverage Report
     needs: get_dockerfiles
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
+    permissions: write-all
+      # pull-requests: write
+      # contents: write
     strategy:
       fail-fast: false
       matrix:

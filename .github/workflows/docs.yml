@@ -35,9 +35,9 @@ jobs:
     name: Run notebook
     needs: get_notebooks
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
+    permissions: write-all
+      # pull-requests: write
+      # contents: write
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user root
