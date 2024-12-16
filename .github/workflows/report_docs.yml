@@ -1,0 +1,45 @@
+name: Docs Report
+
+on:
+  workflow_run:
+    workflows:
+      - Sphinx Docs
+    types:
+      - completed
+
+permissions:
+  issues: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  docs_report:
+    name: Docs report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          name: docs-data
+
+      - name: Parse docs data docs_data.json to outputs
+        id: parse_docs_data
+        run: |
+          echo "artifact-url=$(jq -r '.artifact_url' docs_data.json)" >> $GITHUB_ENV
+          echo "pr-number=$(jq -r '.pr_number' docs_data.json)" >> $GITHUB_ENV
+          echo "event-number=$(jq -r '.event_number' docs_data.json)" >> $GITHUB_ENV
+          echo "event-name=$(jq -r '.event_name' docs_data.json)" >> $GITHUB_ENV
+
+      - name: Update PR with link to summary
+        uses: edumserrano/find-create-or-update-comment@v3
+        with:
+          issue-number: ${{ steps.parse_docs_data.outputs.pr-number }}
+          body-includes: '<!-- documentation build ${{ steps.parse_docs_data.outputs.event-number }} -->'
+          comment-author: 'github-actions[bot]'
+          body: |
+            <!-- documentation build ${{ steps.parse_docs_data.outputs.event-number }} -->
+            ### :books: Documentation
+            :file_folder: [Download as zip](${{ steps.parse_docs_data.outputs.artifact-url }})
+            :mag: [View online](https://zimf.de/zipserve/${{ steps.parse_docs_data.outputs.artifact-url }}/)
+          edit-mode: replace
