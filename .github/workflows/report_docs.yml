@@ -34,6 +34,7 @@ jobs:
           echo "event-name=$(jq -r '.event_name' docs_data.json)" >> $GITHUB_ENV
 
       - name: Update PR with link to summary
+        if: ${{ steps.parse_docs_data.outputs.event-name == 'pull_request' }}
         uses: edumserrano/find-create-or-update-comment@v3
         with:
           issue-number: ${{ steps.parse_docs_data.outputs.pr-number }}

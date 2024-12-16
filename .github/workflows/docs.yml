@@ -117,6 +117,7 @@ jobs:
           echo '"event_number": "${{ github.event.number }}",' >> docs_data.json
           echo '"event_name": "${{ github.event_name }}",' >> docs_data.json
           echo '"artifact_url": "${{ steps.save_docu.outputs.artifact-url }}"}' >> docs_data.json
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
