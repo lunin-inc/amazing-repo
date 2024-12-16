@@ -38,7 +38,7 @@ jobs:
         id: set-matrix
         if: steps.filter.outputs.docker_toml == 'true' || github.event_name == 'push'
         run: |
-          docker_tasks=[{"filepath":"docker/Dockerfile_py310","image_name":"ghcr.io/ptb-mr/mrpro_py310"},{"filepath":"docker/Dockerfile_py311","image_name":"ghcr.io/ptb-mr/mrpro_py311"},{"filepath":"docker/Dockerfile_py312","image_name":"ghcr.io/ptb-mr/mrpro_py312"}]
+          docker_tasks='[{"filepath":"docker/Dockerfile_py310","image_name":"ghcr.io/ptb-mr/mrpro_py310"},{"filepath":"docker/Dockerfile_py311","image_name":"ghcr.io/ptb-mr/mrpro_py311"},{"filepath":"docker/Dockerfile_py312","image_name":"ghcr.io/ptb-mr/mrpro_py312"}]'
           echo "docker_tasks=$docker_tasks" >> $GITHUB_OUTPUT
 
   test:
