@@ -6,8 +6,7 @@ on:
       - main
   pull_request:
 
-permissions:
-  contents: write
+permissions: write-all
 
 defaults:
   run:
@@ -88,9 +87,7 @@ jobs:
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user runner
-    permissions:
-      pull-requests: write
-      contents: write
+    permissions: write-all
     steps:
       - name: Checkout
         uses: actions/checkout@v4
