@@ -6,7 +6,10 @@ on:
       - main
   pull_request:
 
-permissions: write-all
+permissions:
+  pull-requests: write
+  contents: write
+  issues: write
 
 defaults:
   run:
@@ -34,9 +37,10 @@ jobs:
     name: Run notebook
     needs: get_notebooks
     runs-on: ubuntu-latest
-    permissions: write-all
-      # pull-requests: write
-      # contents: write
+    permissions:
+      pull-requests: write
+      contents: write
+      issues: write
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user root
@@ -47,8 +51,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.convert_scripts.outputs.commit_hash }}
 
       - name: Install mrpro and dependencies
         run: pip install --upgrade --upgrade-strategy "eager" .[notebook]
@@ -87,7 +89,10 @@ jobs:
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user runner
-    permissions: write-all
+    permissions:
+      pull-requests: write
+      contents: write
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
