@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  pull_request_target:
+    types:
+      - opened  # When a PR is first created
+      - synchronize  # When a PR is updated (e.g., new commits pushed)
 
 permissions:
   pull-requests: write
