@@ -6,6 +6,11 @@ on:
     branches:
       - main
 
+permissions:
+  pull-requests: write
+  contents: write
+  issues: write
+
 jobs:
   get_dockerfiles:
     name: Get List of Dockerfiles for Containers
@@ -47,9 +52,10 @@ jobs:
     name: Run Tests and Coverage Report
     needs: get_dockerfiles
     runs-on: ubuntu-latest
-    permissions: write-all
-      # pull-requests: write
-      # contents: write
+    permissions:
+      pull-requests: write
+      contents: write
+      issues: write
     strategy:
       fail-fast: false
       matrix:
