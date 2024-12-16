@@ -1,0 +1,72 @@
+name: Build and test docker
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+  push:
+    branches:
+      - main
+
+
+jobs:
+  get_dockerfiles:
+    name: Get list of Docker files for different containers
+    runs-on: ubuntu-latest
+    outputs:
+      docker_toml: ${{ steps.filter.outputs.docker_toml }}
+      docker_tasks: ${{ steps.set-matrix.outputs.docker_tasks }}
+    steps:
+      - name: Checkout mrpro repo
+        uses: actions/checkout@v4
+
+      - name: Check if files in docker or the toml file has been modified
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docker_toml:
+              - 'docker/*'
+              - '.github/workflows/docker.yml'
+
+      - name: Do we need to do something?
+        run: |
+          echo "Push to main? ${{ github.event_name }} "
+          echo "Rebuild containers? ${{ steps.filter.outputs.docker_toml }}"
+
+      - name: Define docker image names
+        id: set-matrix
+        if: steps.filter.outputs.docker_toml == 'true' || github.event_name == 'push'
+        run: |
+          docker_tasks=[{"filepath":"docker/Dockerfile_py310","image_name":"ghcr.io/ptb-mr/mrpro_py310"},{"filepath":"docker/Dockerfile_py311","image_name":"ghcr.io/ptb-mr/mrpro_py311"},{"filepath":"docker/Dockerfile_py312","image_name":"ghcr.io/ptb-mr/mrpro_py312"}]
+          echo "docker_tasks=$docker_tasks" >> $GITHUB_OUTPUT
+
+  test:
+    name: Test docker containers
+    needs: get_dockerfiles
+    if: needs.get_dockerfiles.outputs.docker_toml == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    strategy:
+      matrix:
+        docker_task: ${{ fromJson(needs.get_dockerfiles.outputs.docker_tasks) }}
+    # runs within Docker container
+    container:
+      image: ${{ matrix.docker_task.image_name }}:latest
+      options: --user runner
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install mrpro and dependencies
+        run: pip install --upgrade --upgrade-strategy "eager" .[test]
+
+      - name: Install pytest-github-actions-annotate-failures plugin
+        run: pip install pytest-github-actions-annotate-failures
+
+      - name: Run PyTest
+        run: |
+          pytest -n 4 -m "not cuda"
