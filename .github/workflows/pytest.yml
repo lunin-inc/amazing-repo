@@ -94,6 +94,7 @@ jobs:
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
+          unique-id-for-comment: ${{ matrix.imagename }}
 
       # - name: Create Coverage Badge on Main Branch Push
       #   uses: schneegans/dynamic-badges-action@v1.7.0
