@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   pull_request_target:
     types:
       - opened  # When a PR is first created
@@ -129,7 +130,7 @@ jobs:
       - run: echo 'Event name ${{github.event_name}}'
 
       - name: Update PR with link to summary
-        if: github.event_name == 'pull_request_target'
+        if: github.event_name == 'pull_request_target' || github.event_name == 'pull_request'
         uses: edumserrano/find-create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
