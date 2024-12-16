@@ -33,8 +33,15 @@ jobs:
           echo "event-number=$(jq -r '.event_number' docs_data.json)" >> $GITHUB_ENV
           echo "event-name=$(jq -r '.event_name' docs_data.json)" >> $GITHUB_ENV
 
+      - name: Print docs data
+        run: |
+          echo "artifact-url: ${{ steps.parse_docs_data.outputs.artifact-url }}"
+          echo "pr-number: ${{ steps.parse_docs_data.outputs.pr-number }}"
+          echo "event-number: ${{ steps.parse_docs_data.outputs.event-number }}"
+          echo "event-name: ${{ steps.parse_docs_data.outputs.event-name }}"
+
       - name: Update PR with link to summary
-        if: ${{ steps.parse_docs_data.outputs.event-name == 'pull_request' }}
+        if: steps.parse_docs_data.outputs.event-name == 'pull_request'
         uses: edumserrano/find-create-or-update-comment@v3
         with:
           issue-number: ${{ steps.parse_docs_data.outputs.pr-number }}

@@ -24,14 +24,13 @@ jobs:
         with:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: .coverage
           name: pytest-coverage
 
       - name: Post PyTest Coverage Comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
-          pytest-coverage-path: ./coverage/pytest-coverage.txt
-          junitxml-path: ./coverage/pytest.xml
+          pytest-coverage-path: pytest-coverage.txt
+          junitxml-path: pytest.xml
 
       # - name: Create Coverage Badge on Main Branch Push
       #   uses: schneegans/dynamic-badges-action@v1.7.0
