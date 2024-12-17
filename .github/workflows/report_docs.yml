@@ -35,21 +35,21 @@ jobs:
 
       - name: Print docs data
         run: |
-          echo "artifact-url: ${{ steps.parse_docs_data.outputs.artifact-url }}"
-          echo "pr-number: ${{ steps.parse_docs_data.outputs.pr-number }}"
-          echo "event-number: ${{ steps.parse_docs_data.outputs.event-number }}"
-          echo "event-name: ${{ steps.parse_docs_data.outputs.event-name }}"
+          echo "artifact-url: ${{ env.artifact-url }}"
+          echo "pr-number: ${{ env.outputs.pr-number }}"
+          echo "event-number: ${{ env.event-number }}"
+          echo "event-name: ${{ env.outputs.event-name }}"
 
       - name: Update PR with link to summary
-        if: steps.parse_docs_data.outputs.event-name == 'pull_request'
+        if: env.event-name == 'pull_request'
         uses: edumserrano/find-create-or-update-comment@v3
         with:
-          issue-number: ${{ steps.parse_docs_data.outputs.pr-number }}
-          body-includes: '<!-- documentation build ${{ steps.parse_docs_data.outputs.event-number }} -->'
+          issue-number: ${{ env.pr-number }}
+          body-includes: '<!-- documentation build ${{ env.event-number }} -->'
           comment-author: 'github-actions[bot]'
           body: |
-            <!-- documentation build ${{ steps.parse_docs_data.outputs.event-number }} -->
+            <!-- documentation build ${{ env.event-number }} -->
             ### :books: Documentation
-            :file_folder: [Download as zip](${{ steps.parse_docs_data.outputs.artifact-url }})
-            :mag: [View online](https://zimf.de/zipserve/${{ steps.parse_docs_data.outputs.artifact-url }}/)
+            :file_folder: [Download as zip](${{ env.artifact-url }})
+            :mag: [View online](https://zimf.de/zipserve/${{ env.artifact-url }}/)
           edit-mode: replace
