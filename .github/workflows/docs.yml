@@ -111,6 +111,7 @@ jobs:
       - run: echo 'Event number ${{ github.event.number }}'
 
       - run: echo 'Event name ${{github.event_name}}'
+
       - name: Save documentation info
         run: |
           echo '{"pr_number": "${{ github.event.pull_request.number }}",' > docs_data.json
