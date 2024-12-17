@@ -26,10 +26,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: pytest-coverage
 
+      - name: Parse PR number
+        run: |
+          echo "PR_NUMBER=$(cat PR_NUMBER)" >> $GITHUB_ENV
+
       - name: Post PyTest Coverage Comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
-          issue-number: $(cat PR_NUMBER)
+          issue-number: ${{ env.PR_NUMBER }}
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
 
