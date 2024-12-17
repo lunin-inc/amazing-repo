@@ -38,7 +38,7 @@ jobs:
           echo "artifact-url: ${{ env.artifact-url }}"
           echo "pr-number: ${{ env.outputs.pr-number }}"
           echo "event-number: ${{ env.event-number }}"
-          echo "event-name: ${{ env.outputs.event-name }}"
+          echo "event-name: ${{ env.event-name }}"
 
       - name: Update PR with link to summary
         if: env.event-name == 'pull_request'
