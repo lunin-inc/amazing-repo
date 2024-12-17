@@ -29,6 +29,7 @@ jobs:
       - name: Post PyTest Coverage Comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
+          issue-number: $(cat PR_NUMBER)
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
 

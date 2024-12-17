@@ -68,6 +68,9 @@ jobs:
           pytest -n 4 -m "not cuda" --junitxml=pytest.xml \
           --cov-report=term-missing:skip-covered --cov=mrpro | tee pytest-coverage.txt
 
+      - name: Save pr number
+        run: echo "${{ github.event.number }}" >> PR_NUMBER
+
       - name: Upload PyTest Coverage Report for py312
         uses: actions/upload-artifact@v4
         with:
@@ -75,6 +78,7 @@ jobs:
           path: |
             pytest-coverage.txt
             pytest.xml
+            PR_NUMBER
           if-no-files-found: error
           overwrite: true
 
