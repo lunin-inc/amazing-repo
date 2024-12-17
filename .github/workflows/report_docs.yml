@@ -41,7 +41,7 @@ jobs:
           echo "ref=$(jq -r '.ref' docs_data.json)" >> $GITHUB_ENV
 
       - name: Set outputs
-        id: docs_data
+        id: docs
         run: |
           echo "artifact-url=${{ env.artifact-url }}" >> $GITHUB_OUTPUT
           echo "pr-number=${{ env.pr-number }}" >> $GITHUB_OUTPUT
