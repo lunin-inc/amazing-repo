@@ -67,6 +67,24 @@ jobs:
         run: |
           pytest -n 4 -m "not cuda" --junitxml=pytest.xml \
           --cov-report=term-missing:skip-covered --cov=mrpro | tee pytest-coverage.txt
+      - name: Count failures and errors
+        run: |
+          python -c "
+          import os
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('pytest.xml')
+          root = tree.getroot()
+          testsuite = root.find('testsuite') if root.tag != 'testsuite' else root
+          failures = testsuite.attrib.get('failures', 0)
+          errors = testsuite.attrib.get('errors', 0)
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write(f'FAILURES={failures}\n')
+              f.write(f'ERRORS={errors}\n')
+          "
+      - name: Output test results
+        run: |
+          echo "FAILURES=${{ env.FAILURES }}"
+          echo "ERRORS=${{ env.ERRORS }}"
 
       - name: Save pr number
         run: echo "${{ github.event.number }}" >> PR_NUMBER
