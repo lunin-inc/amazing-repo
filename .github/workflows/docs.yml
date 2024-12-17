@@ -6,68 +6,17 @@ on:
       - main
   pull_request:
 
-permissions:
-  contents: write
-
 defaults:
   run:
     shell: bash
 
 jobs:
-  convert_scripts:
-    name: Translate scripts to notebooks
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
-    outputs:
-      commit_hash: ${{ steps.add-commit-push.outputs.commit_hash }}
-    container:
-      image: ghcr.io/ptb-mr/mrpro_py311:latest
-      options: --user runner
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.commit }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
-
-      - name: Install mrpro and dependencies
-        run: pip install --upgrade --upgrade-strategy "eager" .[notebook]
-
-      - name: Translate scripts to notebooks
-        run: |
-          scripts=$(ls ./examples/*.py)
-          for script in $scripts
-            do jupytext --set-kernel "python3" --update --output ${script//.py/.ipynb} $script
-          done
-
-      - name: Check if any notebooks have been changed
-        uses: tj-actions/verify-changed-files@v20
-        id: verify-changed-notebooks
-        with:
-          files: ./examples/*.ipynb
-
-      - name: Commit notebooks
-        if: steps.verify-changed-notebooks.outputs.files_changed == 'true'
-        uses: actions4git/add-commit-push@v1
-        with:
-          commit-message: Notebooks updated
-
-      - name: Get hash of last commit
-        id: add-commit-push
-        run: echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
   get_notebooks:
     name: Get list of notebooks
-    needs: convert_scripts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout mrpro repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.convert_scripts.outputs.commit_hash }}
 
       - id: set-matrix
         run: |
@@ -81,11 +30,8 @@ jobs:
 
   run_notebook:
     name: Run notebook
-    needs: [convert_scripts, get_notebooks]
+    needs: get_notebooks
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user root
@@ -96,8 +42,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.convert_scripts.outputs.commit_hash }}
 
       - name: Install mrpro and dependencies
         run: pip install --upgrade --upgrade-strategy "eager" .[notebook]
@@ -131,14 +75,11 @@ jobs:
 
   create_documentation:
     name: Build and deploy documentation
-    needs: [convert_scripts, run_notebook]
+    needs: run_notebook
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user runner
-    permissions:
-      pull-requests: write
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -158,7 +99,7 @@ jobs:
           sphinx-build -b html ./docs/source ./docs/build/html
           rm -rf ./docs/build/html/.doctrees
 
-      - name: Upload documentation artifact
+      - name: Save Documentation
         id: save_docu
         uses: actions/upload-artifact@v4
         with:
@@ -171,15 +112,14 @@ jobs:
 
       - run: echo 'Event name ${{github.event_name}}'
 
-      - name: Dump documentation info
+      - name: Save documentation info
         run: |
           echo '{"pr_number": "${{ github.event.pull_request.number }}",' > docs_data.json
           echo '"event_number": "${{ github.event.number }}",' >> docs_data.json
           echo '"event_name": "${{ github.event_name }}",' >> docs_data.json
-          echo '"ref": "${{ github.ref }}",' >> docs_data.json
           echo '"artifact_url": "${{ steps.save_docu.outputs.artifact-url }}"}' >> docs_data.json
 
-      - name: Upload docs-data artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: docs-data
