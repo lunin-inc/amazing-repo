@@ -78,8 +78,8 @@ jobs:
           failures = testsuite.attrib.get('failures', 0)
           errors = testsuite.attrib.get('errors', 0)
           with open(os.environ['GITHUB_ENV'], 'a') as f:
-              f.write(f'FAILURES={failures}\n')
-              f.write(f'ERRORS={errors}\n')
+              f.write(f'FAILURES={failures}')
+              f.write(f'ERRORS={errors}')
           "
       - name: Output test results
         run: |
