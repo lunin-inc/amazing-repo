@@ -78,8 +78,8 @@ jobs:
           failures = testsuite.attrib.get('failures', 0)
           errors = testsuite.attrib.get('errors', 0)
           with open(os.environ['GITHUB_ENV'], 'a') as f:
-              f.write(f'FAILURES={failures}')
-              f.write(f'ERRORS={errors}')
+              f.write(f'FAILURES={failures}\n')
+              f.write(f'ERRORS={errors}\n')
           "
       - name: Output test results
         run: |
@@ -101,7 +101,7 @@ jobs:
           overwrite: true
 
       - name: Set Pipeline Status Based on Test Results
-        if: ${{ env.ERRORS }} != 0 || ${{ env.FAILURES }} != 0
+        if: ${{ env.ERRORS != 0 || env.FAILURES != 0 }}
         uses: actions/github-script@v7
         with:
           script: |
