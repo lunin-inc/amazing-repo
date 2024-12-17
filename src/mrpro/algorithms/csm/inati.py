@@ -64,4 +64,4 @@ def inati(
     phase = singular_value.sum(-1)
     phase /= phase.abs()  # z y x
     csm = singular_vector.conj() * phase[None, ...]
-    return csm
+    return -csm*1e5
