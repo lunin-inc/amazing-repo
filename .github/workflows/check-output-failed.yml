@@ -1,0 +1,35 @@
+name: Coverage Report
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sim_docs_build:
+    name: Check outputs if the step is not executed
+    runs-on: ubuntu-latest
+    steps:
+      # download artifacts from the test job in the pytest.yml workflow
+      - name: Fail in this step
+        run: exit 1
+
+      - name: Upload artifact
+        id: upload_docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: docs/build/html/
+
+      - name: Dump documentation info
+        if: always()
+        run: |
+          echo "artifact-url=${{ steps.upload_docs.outputs.artifact-url }}" > docs_metadata
+          echo "pr-number=${{ github.event.pull_request.number }}" >> docs_metadata
+          echo "event-number=${{ github.event.number }}" >> docs_metadata
+          echo "event-name=${{ github.event_name }}" >> docs_metadata
+          echo "ref=${{ github.ref }}" >> docs_metadata
+
+      - name: Print metdata
+        if: always()
+        run: cat docs_metadata
