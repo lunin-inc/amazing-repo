@@ -24,18 +24,35 @@ jobs:
         with:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          name: pytest-coverage
+          name: pytest-report
 
-      - name: Parse PR number
+      # pytest_metadata is set in pytest.yml as A=value\nB=value\n...
+      - name: Set vars from pytest_metadata
         run: |
-          echo "PR_NUMBER=$(cat PR_NUMBER)" >> $GITHUB_ENV
+          while IFS= read -r line; do
+            echo "$line" >> $GITHUB_ENV
+          done < pytest_metadata
 
       - name: Post PyTest Coverage Comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
-          issue-number: ${{ env.PR_NUMBER }}
+          issue-number: ${{ env.pr-number }}
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
+
+      - name: Post Failure Comment if Coverage Comment failed
+        if: '!success()'
+        uses: edumserrano/find-create-or-update-comment@v3
+        with:
+          issue-number: ${{ env.pr-number }}
+          # see https://github.com/MishaKav/pytest-coverage-comment/blob/81882822c5b22af01f91bd3eacb1cefb6ad73dc2/src/index.js#L97
+          # for the generation of the unique id for comment
+          # in this particular case, there is no additional watermarkUniqueId
+          body-includes: '<!-- Pytest Coverage Comment: ${{ github.job }} -->\n'
+          comment-author: 'github-actions[bot]'
+          body: |
+            PyTest Coverage Report was not found. Check the PyTest Workflow.
+          edit-mode: replace
 
       # - name: Create Coverage Badge on Main Branch Push
       #   uses: schneegans/dynamic-badges-action@v1.7.0
