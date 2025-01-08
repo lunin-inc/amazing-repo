@@ -54,7 +54,10 @@ jobs:
           body-includes: '<!-- Pytest Coverage Comment: ${{ github.job }} -->\n'
           comment-author: 'github-actions[bot]'
           body: |
-            PyTest Coverage Report was not found. Check the PyTest Workflow.
+            <!-- Pytest Coverage Comment: ${{ github.job }} -->
+            ### :x: PyTest Coverage Report was not found.
+
+            Check the PyTest Workflow.
           edit-mode: replace
 
       # - name: Create Coverage Badge on Main Branch Push
