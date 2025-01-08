@@ -84,8 +84,7 @@ jobs:
             pytest-coverage.txt
             pytest.xml
         # upload the artifact even if no coverage files are found
-        if-no-files-found: warn
-        overwrite: true
+          overwrite: true
 
       - name: Verify PyTest XML Output
         run: |
