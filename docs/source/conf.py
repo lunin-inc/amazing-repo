@@ -22,21 +22,11 @@ sys.path.insert(0, os.path.abspath('../../src'))  # Source code dir relative to 
 
 project = name
 copyright = '2023, Physikalisch-Technische Bundesanstalt (PTB) Berlin'
-author = author
 version = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    'sphinx.ext.doctest',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.mathjax',
-    'sphinx-mathjax-offline'
-]
 autosummary_generate = True
 autosummary_imported_members = False
 autosummary_ignore_module_all = False
@@ -57,15 +47,12 @@ nb_execution_mode = "off"
 html_theme = 'sphinx_rtd_theme'
 html_title = name
 html_show_sphinx = False
-html_static_path = ['_static']
 html_css_files = ['custom.css']
 html_logo = '_static/logo_white.svg'
-html_sidebars = {'**': ['search-field', 'sidebar-nav-bs']}
 html_theme_options = {
     'logo_only': True,
     'pygment_light_style': 'default',
     'pygment_dark_style': 'github-dark',
-    'show_toc_level': 3,
     'icon_links': [
         {
             # Label for this link
