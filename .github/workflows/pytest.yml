@@ -75,7 +75,7 @@ jobs:
           failures = testsuite.attrib.get('failures', 0)
           errors = testsuite.attrib.get('errors', 0)
           if failures or errors:
-              sys.exit("PyTest failed with %s failures and %s errors" % (failures, errors))
+              sys.exit('PyTest failed with %s failures and %s errors' % (failures, errors))
           "
 
       - name: Dump PR number, event name and ref to pytest_data file
