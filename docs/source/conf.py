@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../../src'))  # Source code dir relative to 
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
+1/0
 project = name
 copyright = '2023, Physikalisch-Technische Bundesanstalt (PTB) Berlin'
 version = version
