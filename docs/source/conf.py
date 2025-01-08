@@ -34,7 +34,6 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'myst_nb',
     'sphinx.ext.mathjax',
     'sphinx-mathjax-offline'
 ]
