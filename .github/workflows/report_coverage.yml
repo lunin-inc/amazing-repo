@@ -34,6 +34,7 @@ jobs:
           done < pytest_metadata
 
       - name: Post PyTest Coverage Comment
+        id: coverage_comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
           issue-number: ${{ env.pr-number }}
@@ -41,7 +42,9 @@ jobs:
           junitxml-path: pytest.xml
 
       - name: Post Failure Comment if Coverage Comment failed
-        if: '!success()'
+        # if there is no data the comment action does not fail
+        # but has an empty output
+        if: steps.coverage_comment.outputs.coverageHtml == ''
         uses: edumserrano/find-create-or-update-comment@v3
         with:
           issue-number: ${{ env.pr-number }}
