@@ -9,20 +9,13 @@ on:
 
 permissions:
   actions: read
-  issues: write
-  contents: write
   pull-requests: write
 
 jobs:
   docs_report:
     name: Docs report
     runs-on: ubuntu-latest
-    outputs:
-      artifact-url: ${{ steps.docs.outputs.artifact-url }}
-      pr-number: ${{ steps.docs.outputs.pr-number }}
-      event-number: ${{ steps.docs.outputs.event-number }}
-      event-name: ${{ steps.docs.outputs.event-name }}
-      ref: ${{ steps.docs.outputs.ref }}
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -32,26 +25,41 @@ jobs:
           name: docs-metadata
 
       # docs_data is set in docs.yml as A=value\nB=value\n...
-      - name: Set vars from docs_data
-        id: docs_data
+      - name: Set artifacts URL to env
         run: |
-          while IFS= read -r line; do
-            # for this job
-            echo "$line" >> $GITHUB_ENV
-            # for the next job
-            echo "$line" >> $GITHUB_OUTPUT
-          done < docs_metadata
+          echo "artifact-url=$(cat artifact_url)" >> $GITHUB_ENV
+  
+      - name: 'Get PR context'
+        id: pr-context
+        env:
+          # Token required for GH CLI:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Best practice for scripts is to reference via ENV at runtime. Avoid using the expression syntax in the script content directly:
+          PR_TARGET_REPO: ${{ github.repository }}
+          # If the PR is from a fork, prefix it with `<owner-login>:`, otherwise only the PR branch name is relevant:
+          PR_BRANCH: |-
+            ${{
+              (github.event.workflow_run.head_repository.owner.login != github.event.workflow_run.repository.owner.login)
+                && format('{0}:{1}', github.event.workflow_run.head_repository.owner.login, github.event.workflow_run.head_branch)
+                || github.event.workflow_run.head_branch
+            }}
+        # Query the PR number by repo + branch, then assign to step output:
+        run: |
+          gh pr view --repo "${PR_TARGET_REPO}" "${PR_BRANCH}" \
+              --json 'number' --jq '"number=\(.number)"' \
+              >> "${GITHUB_OUTPUT}"
+      
 
       # if the build of docs was successful the "artifact-url" will be non-empty
       - name: Update PR with link to summary
-        if: ${{ env.artifact-url != '' && env.event-name == 'pull_request' }}
+        if: ${{ env.artifact-url != '' }}
         uses: edumserrano/find-create-or-update-comment@v3
         with:
-          issue-number: ${{ env.pr-number }}
-          body-includes: '<!-- documentation build ${{ env.event-number }} -->'
+          issue-number: ${{ steps.pr-context.outputs.number }}
+          body-includes: '<!-- documentation build ${{ steps.pr-context.outputs.number }} -->'
           comment-author: 'github-actions[bot]'
           body: |
-            <!-- documentation build ${{ env.event-number }} -->
+            <!-- documentation build ${{ steps.pr-context.outputs.number }} -->
             ### :books: Documentation
             :file_folder: [Download as zip](${{ env.artifact-url }})
             :mag: [View online](https://zimf.de/zipserve/${{ env.artifact-url }}/)
@@ -59,14 +67,14 @@ jobs:
 
       # if the build of docs failed the "artifact-url" will be an empty string
       - name: Report failure of docs build
-        if: ${{ env.artifact-url == '' && env.event-name == 'pull_request' }}
+        if: ${{ env.artifact-url == '' }}
         uses: edumserrano/find-create-or-update-comment@v3
         with:
-          issue-number: ${{ env.pr-number }}
-          body-includes: '<!-- documentation build ${{ env.event-number }} -->'
+          issue-number: ${{ steps.pr-context.outputs.number }}
+          body-includes: '<!-- documentation build ${{ steps.pr-context.outputs.number }} -->'
           comment-author: 'github-actions[bot]'
           body: |
-            <!-- documentation build ${{ env.event-number }} -->
+            <!-- documentation build ${{ steps.pr-context.outputs.number }} -->
             ### :books: Documentation
             :x: Documentation build failed. Check the Sphinx Docs workflow.
           edit-mode: replace
@@ -76,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: docs_report
     # maybe should be test that the parent workflow was successful...
-    if: needs.docs_report.outputs.event-name == 'push' && needs.docs_report.outputs.ref == 'refs/heads/main'
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
     permissions:
         pages: write
         id-token: write
