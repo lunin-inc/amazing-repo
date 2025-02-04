@@ -5,7 +5,7 @@
    :width: 400
 |
 
-Welcome to MRpro's documentation of lrlunin's 2nd public fork!
+Welcome to MRpro's documentation of lrlunin's local pr!
 =================================
 
 .. toctree::
