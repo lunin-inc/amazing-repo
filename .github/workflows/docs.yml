@@ -110,7 +110,7 @@ jobs:
       - name: Dump documentation info
         if: always()
         run: |
-          echo "artifact-url=${{ steps.upload_docs.outputs.artifact-url }}" > artifact_url
+          echo "${{ steps.upload_docs.outputs.artifact-url }}" > artifact_url
 
       - name: Upload docs-metadata artifact
         if: always()
