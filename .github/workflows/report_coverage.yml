@@ -24,6 +24,27 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: pytest-report
 
+      - name: 'Get PR context'
+        id: pr-context
+        env:
+          # Token required for GH CLI:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Best practice for scripts is to reference via ENV at runtime. Avoid using the expression syntax in the script content directly:
+          PR_TARGET_REPO: ${{ github.repository }}
+          # If the PR is from a fork, prefix it with `<owner-login>:`, otherwise only the PR branch name is relevant:
+          PR_BRANCH: |-
+            ${{
+              (github.event.workflow_run.head_repository.owner.login != github.event.workflow_run.repository.owner.login)
+                && format('{0}:{1}', github.event.workflow_run.head_repository.owner.login, github.event.workflow_run.head_branch)
+                || github.event.workflow_run.head_branch
+            }}
+        # Query the PR number by repo + branch, then assign to step output:
+        run: |
+          gh pr view --repo "${PR_TARGET_REPO}" "${PR_BRANCH}" \
+              --json 'number' --jq '"number=\(.number)"' \
+              >> "${GITHUB_OUTPUT}"
+        
+
       # pytest_metadata is set in pytest.yml as A=value\nB=value\n...
       - name: Set vars from pytest_metadata
         run: |
@@ -35,6 +56,7 @@ jobs:
           echo ${{ github.event.workflow_run.event }} \
           echo ${{ github.event.workflow_run.event.pull_request }} \
           echo ${{ github.event.workflow_run.event.pull_request.number }} \
+          echo ${{ steps.pr-context.outputs.number }}
           echo ${{ env.pr-number }}
 
       - name: Post PyTest Coverage Comment
