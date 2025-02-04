@@ -5,15 +5,6 @@ on:
     branches:
       - main
   pull_request:
-  pull_request_target:
-    types:
-      - opened  # When a PR is first created
-      - synchronize  # When a PR is updated (e.g., new commits pushed)
-
-permissions:
-  pull-requests: write
-  contents: write
-  issues: write
 
 defaults:
   run:
@@ -41,10 +32,6 @@ jobs:
     name: Run notebook
     needs: get_notebooks
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
-      issues: write
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user root
@@ -93,10 +80,6 @@ jobs:
     container:
       image: ghcr.io/ptb-mr/mrpro_py311:latest
       options: --user runner
-    permissions:
-      pull-requests: write
-      contents: write
-      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -116,32 +99,29 @@ jobs:
           sphinx-build -b html ./docs/source ./docs/build/html
           rm -rf ./docs/build/html/.doctrees
 
-      - name: Save Documentation
-        id: save_docu
+      - name: Upload documentation artifact
+        id: upload_docs
         uses: actions/upload-artifact@v4
         with:
           name: Documentation
           path: docs/build/html/
 
-      - run: echo 'Artifact url ${{ steps.save_docu.outputs.artifact-url }}'
+      # if the one of above steps fails the "artifact-url" will be an empty string
+      - name: Dump documentation info
+        if: always()
+        run: |
+          echo "artifact-url=${{ steps.upload_docs.outputs.artifact-url }}" > docs_metadata
+          echo "pr-number=${{ github.event.pull_request.number }}" >> docs_metadata
+          echo "event-number=${{ github.event.number }}" >> docs_metadata
+          echo "event-name=${{ github.event_name }}" >> docs_metadata
+          echo "ref=${{ github.ref }}" >> docs_metadata
 
-      - run: echo 'Event number ${{ github.event.number }}'
-
-      - run: echo 'Event name ${{github.event_name}}'
-
-      - name: Update PR with link to summary
-        if: github.event_name == 'pull_request_target' || github.event_name == 'pull_request'
-        uses: edumserrano/find-create-or-update-comment@v3
+      - name: Upload docs-metadata artifact
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: '<!-- documentation build ${{ github.event.number }} -->'
-          comment-author: 'github-actions[bot]'
-          body: |
-            <!-- documentation build ${{ github.event.number }} -->
-            ### :books: Documentation
-            :file_folder: [Download as zip](${{ steps.save_docu.outputs.artifact-url }})
-            :mag: [View online](https://zimf.de/zipserve/${{ steps.save_docu.outputs.artifact-url }}/)
-          edit-mode: replace
+          name: docs-metadata
+          path: docs_metadata
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
