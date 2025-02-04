@@ -56,7 +56,8 @@ jobs:
           echo ${{ github.event.workflow_run.event }} \
           echo ${{ github.event.workflow_run.event.pull_request }} \
           echo ${{ github.event.workflow_run.event.pull_request.number }} \
-          echo ${{ steps.pr-context.outputs.number }}
+          echo ${{ steps.pr-context.outputs.number }} \
+          echo ${{ github.event.workflow_run.head_branch }} \
           echo ${{ env.pr-number }}
 
       - name: Post PyTest Coverage Comment
