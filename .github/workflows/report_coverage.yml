@@ -30,6 +30,12 @@ jobs:
           while IFS= read -r line; do
             echo "$line" >> $GITHUB_ENV
           done < pytest_metadata
+      - name: Show parent workflow info
+        run: |
+          echo ${{ github.event.workflow_run.event }} \
+          echo ${{ github.event.workflow_run.event.pull_request }} \
+          echo ${{ github.event.workflow_run.event.pull_request.number }} \
+          echo ${{ env.pr-number }}
 
       - name: Post PyTest Coverage Comment
         id: coverage_comment
