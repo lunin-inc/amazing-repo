@@ -15,15 +15,17 @@ jobs:
         with:
           name: PTB-MR/mrpro
           ref: refs/heads/main
-
+      - name: Show nvidia-smi results
+        run: |
+          nvidia-smi
+        
       - name: Install MRpro and Dependencies
         run: pip install --upgrade --upgrade-strategy eager .[test]
 
       - name: Run PyTest and Generate Coverage Report
         # shell bash sets the -o pipefail
         run: |
-          pytest -n 4 -m "not cuda" --junitxml=pytest.xml \
-          --cov-report=term-missing:skip-covered --cov=mrpro | tee pytest-coverage.txt
+          pytest -n 4 -m "cuda"
         shell: bash
 
 concurrency:
