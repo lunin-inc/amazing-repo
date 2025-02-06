@@ -1,0 +1,36 @@
+name: PyTest self-hosted
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  simple_pytest:
+    name: Run pytest on self-hosted
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/ptb-mr/mrpro_py312:latest
+      options: --user runner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          name: PTB-MR/mrpro
+          ref: refs/heads/main
+
+      - name: Install MRpro and Dependencies
+        run: pip install --upgrade --upgrade-strategy eager .[test]
+
+      - name: Run PyTest and Generate Coverage Report
+        # shell bash sets the -o pipefail
+        run: |
+          pytest -n 4 -m "not cuda" --junitxml=pytest.xml \
+          --cov-report=term-missing:skip-covered --cov=mrpro | tee pytest-coverage.txt
+        shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+
+  # Cancel in-progress runs when a new workflow with the same group name is triggered
+  cancel-in-progress: true
