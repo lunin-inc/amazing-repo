@@ -5,7 +5,7 @@ echo "Requesting registration URL at '${registration_url}'"
 payload=$(curl -sX POST -H "Authorization: token ${GITHUB_PERSONAL_TOKEN}" ${registration_url})
 export RUNNER_TOKEN=$(echo $payload | jq .token --raw-output)
 
-./actions-runner/config.sh \
+./config.sh \
     --name $(hostname) \
     --token ${RUNNER_TOKEN} \
     -- labels my-runner \
@@ -15,7 +15,7 @@ export RUNNER_TOKEN=$(echo $payload | jq .token --raw-output)
     --replace
 
 remove() {
-    ./actions-runner/config.sh remove --unattended --token "${RUNNER_TOKEN}"
+    ./config.sh remove --unattended --token "${RUNNER_TOKEN}"
 }
 
 trap 'remove; exit 130' INT

@@ -32,10 +32,11 @@ RUN curl -o actions-runner-linux-x64-2.322.0.tar.gz -L $ACTION_RUNNER_URL && tar
 
 RUN ./bin/installdependencies.sh
 COPY docker/runner-entrypoint.sh /actions-runner/entrypoint.sh
+RUN chown -R runner /actions-runner
 RUN chmod +x /actions-runner/entrypoint.sh
 
-RUN mkdir /work
+RUN mkdir /work && chown runner /work
 # set user
-# USER runner
+USER runner
 
 ENTRYPOINT ["/actions-runner/entrypoint.sh"]
