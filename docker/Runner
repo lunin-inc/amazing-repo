@@ -30,7 +30,7 @@ WORKDIR /actions-runner
 RUN curl -o actions-runner-linux-x64-2.322.0.tar.gz -L ${ACTION_RUNNER_URL} && tar xzf ./actions-runner-linux-x64-2.322.0.tar.gz
 
 RUN ./bin/installdependencies.sh
-COPY runner-entrypoint.sh /actions-runner/entrypoint.sh
+COPY docker/runner-entrypoint.sh /actions-runner/entrypoint.sh
 RUN chmod +x /actions-runner/entrypoint.sh
 
 RUN mkdir /work
