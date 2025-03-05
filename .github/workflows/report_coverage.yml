@@ -88,7 +88,7 @@ jobs:
           body-includes: "<!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0} ', env.UNIQUE_ID) || '' }}-->"
           comment-author: 'github-actions[bot]'
           body: |
-            <!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0}', env.UNIQUE_ID) || '' }} -->
+            <!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0} ', env.UNIQUE_ID) || '' }}-->
             ### :x: PyTest Coverage Report was not found.
 
             Check the  ${{ github.event.workflow.name }} Workflow.
