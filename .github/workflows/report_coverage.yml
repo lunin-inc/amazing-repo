@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # download artifacts from the test job in the pytest.yml workflow
+      - name: Workflow name
+        run: echo "Triggered by ${{ github.event.workflow_run.name }}"
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
