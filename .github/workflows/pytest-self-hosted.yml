@@ -13,9 +13,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          name: PTB-MR/mrpro
-          ref: refs/heads/main
+
       - name: Show nvidia-smi results
         run: |
           nvidia-smi
