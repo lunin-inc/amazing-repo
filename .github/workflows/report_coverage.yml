@@ -66,8 +66,8 @@ jobs:
         id: coverage_comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
-          title: Coverage reprt for ${{ github.event.workflow_run.name }}
-          hide-badge: ${{ env.UNIQUE_ID == '' && 'true' || 'false' }}
+          title: Coverage report for ${{ github.event.workflow_run.name }}
+          hide-badge: ${{ env.UNIQUE_ID != '' && 'true' || 'false' }}
           issue-number: ${{ steps.pr-context.outputs.number }}
           unique-id-for-comment: ${{ env.UNIQUE_ID }}
           pytest-coverage-path: pytest-coverage.txt
