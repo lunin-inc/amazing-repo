@@ -76,7 +76,7 @@ notebook = [
 
 # PyTest section
 [tool.pytest.ini_options]
-testpaths = ["tests_xxxxx"]
+testpaths = ["tests_xbxxxx"]
 filterwarnings = [
     "error",
     "ignore:'write_like_original':DeprecationWarning:pydicom:",
