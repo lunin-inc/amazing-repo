@@ -27,7 +27,7 @@ jobs:
             # use the results of python 3.12, consider this as target platform
             echo "ARTIFACT_NAME=pytest-report-mrpro_py312" >> $GITHUB_ENV
             echo "UNIQUE_ID=" >> $GITHUB_ENV
-          elif [ "${{ github.event.workflow.name }}" == "PyTest-selfhosted" ]; then
+          elif [ "${{ github.event.workflow.name }}" == "PyTest self-hosted" ]; then
             echo "ARTIFACT_NAME=pytest-report-selfhosted" >> $GITHUB_ENV
             echo "UNIQUE_ID=selfhosted" >> $GITHUB_ENV
           fi
