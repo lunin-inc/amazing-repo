@@ -1,6 +1,7 @@
 name: PyTest self-hosted
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -18,7 +19,7 @@ jobs:
       - name: Show nvidia-smi results
         run: |
           nvidia-smi
-        
+
       - name: Install MRpro and Dependencies
         run: pip install --upgrade --upgrade-strategy eager .[test]
 
@@ -32,7 +33,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-report-cuda
+          name: pytest-report-selfhosted
           path: |
             pytest-coverage.txt
             pytest.xml
