@@ -15,7 +15,10 @@ jobs:
   docs_report:
     name: Docs report
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    if: >-
+      ${{ github.event.workflow_run.event == 'pull_request' &&
+          github.event.workflow_run.conclusion != 'cancelled' &&
+          github.event.workflow_run.conclusion != 'skipped' }}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -83,7 +86,11 @@ jobs:
     name: Deploy docs
     runs-on: ubuntu-latest
     # maybe should be test that the parent workflow was successful...
-    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
+    if: >-
+      ${{ github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.conclusion != 'cancelled' &&
+          github.event.workflow_run.conclusion != 'skipped' }}
     permissions:
         pages: write
         id-token: write
