@@ -85,7 +85,7 @@ jobs:
           # see https://github.com/MishaKav/pytest-coverage-comment/blob/81882822c5b22af01f91bd3eacb1cefb6ad73dc2/src/index.js#L97
           # for the generation of the unique id for comment
           # in this particular case, there is no additional watermarkUniqueId
-          body-includes: "<!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0}', env.UNIQUE_ID) || '' }} -->"
+          body-includes: "<!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0} ', env.UNIQUE_ID) || '' }}-->"
           comment-author: 'github-actions[bot]'
           body: |
             <!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0}', env.UNIQUE_ID) || '' }} -->
