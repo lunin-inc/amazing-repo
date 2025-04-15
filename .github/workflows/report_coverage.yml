@@ -69,6 +69,7 @@ jobs:
           title: Coverage report for ${{ github.event.workflow_run.name }}
           # hide badge and coverage for the self-hosted pytest instance
           hide-badge: ${{ env.UNIQUE_ID != '' && 'true' || 'false' }}
+          hide-report: true
           issue-number: ${{ steps.pr-context.outputs.number }}
           unique-id-for-comment: ${{ env.UNIQUE_ID }}
           pytest-coverage-path: pytest-coverage.txt
