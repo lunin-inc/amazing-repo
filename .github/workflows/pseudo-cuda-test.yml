@@ -1,0 +1,15 @@
+name: Cuda-test
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  psuedo_cuda_test:
+    name: Just test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check label
+        if: ${{ github.event.label.name == 'cuda-test' }}
+        run: |
+          echo "I WOULD START CUDA-TEST HERE"
