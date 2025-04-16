@@ -19,3 +19,13 @@ jobs:
       - name: Set the artifact name
         run: |
           echo "${{ github.event.workflow_run.event }}"
+      - name: Test output parsing
+        id: io-io-yo
+        run: |
+         echo "is_pr=${{ 2 == 2 }}" >> $GITHUB_OUTPUT
+      - name: Expression results
+        if: ${{ steps.io-io-yo.outputs.is_pr }}
+        run: "echo ${{ steps.io-io-yo.outputs.is_pr }}"
+      - name: Also test
+        if: ${{ !(!steps.io-io-yo.outputs.is_pr) }}
+        run: "echo ${{ !steps.io-io-yo.outputs.is_pr }}"
