@@ -19,6 +19,28 @@ jobs:
       - name: Set the artifact name
         run: |
           echo "${{ github.event.workflow_run.event }}"
+      - name: Get PR number for the pull_request trigger
+        if: ${{ steps.workflow-trigger.outputs.is_pr }}
+        id: pr-context
+        env:
+          # Token required for GH CLI:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Best practice for scripts is to reference via ENV at runtime. Avoid using the expression syntax in the script content directly:
+          PR_TARGET_REPO: ${{ github.repository }}
+          # If the PR is from a fork, prefix it with `<owner-login>:`, otherwise only the PR branch name is relevant:
+          PR_BRANCH: |-
+            ${{
+              (github.event.workflow_run.head_repository.owner.login != github.event.workflow_run.repository.owner.login)
+                && format('{0}:{1}', github.event.workflow_run.head_repository.owner.login, github.event.workflow_run.head_branch)
+                || github.event.workflow_run.head_branch
+            }}
+        run: |
+          gh pr view --repo "${PR_TARGET_REPO}" "${PR_BRANCH}" \
+              --json 'number' --jq '"number=\(.number)"' \
+              >> "${GITHUB_OUTPUT}"
+      - name: Echo pr-context
+        run: |
+          echo "${{ steps.pr-context.outputs.number }}"
       - name: Test output parsing
         id: io-io-yo
         run: |
