@@ -1,0 +1,21 @@
+name: Workflow from 
+
+on:
+  workflow_run:
+    workflows:
+      - Comment triggered
+    types:
+      - completed
+
+permissions:
+  actions: read
+  pull-requests: write
+
+jobs:
+  print_parent_event_type:
+    name: Print parent event 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set the artifact name
+        run: |
+          echo "${{ github.event.workflow_run.event }}"

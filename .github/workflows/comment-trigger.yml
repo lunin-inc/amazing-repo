@@ -1,0 +1,22 @@
+name: Comment triggered
+
+on:
+  issue_comment:
+    types: [created, edited]
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-check:
+    name: Report type
+    if: >-
+      ${{ (github.event.issue.pull_request &&
+          contains(github.event.comment.body, 'selfhosted run')) || 
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Just print the type
+        run: |
+          echo "PR: ${{ github.event.issue.pull_request }}, PUSH MAIN: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
+    

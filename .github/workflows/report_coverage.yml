@@ -4,71 +4,144 @@ on:
   workflow_run:
     workflows:
       - PyTest
+      - PyTest self-hosted
     types:
       - completed
 
 permissions:
   actions: read
-  issues: write
-  contents: write
   pull-requests: write
 
 jobs:
-  coverage_report:
-    name: Coverage report
+  coverage_report_pr:
+    name: Coverage report PR
+    if: >-
+      ${{ (github.event.workflow_run.event == 'pull_request' &&
+          github.event.workflow_run.conclusion != 'cancelled' &&
+          github.event.workflow_run.conclusion != 'skipped') ||
+          github.event.workflow_run.event == 'issue_comment' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Set the artifact name
+        run: |
+          if [ "${{ github.event.workflow.name }}" == "PyTest" ]; then
+            # use the results of python 3.12, consider this as target platform
+            echo "ARTIFACT_NAME=pytest-report-mrpro_py312" >> $GITHUB_ENV
+            echo "UNIQUE_ID=" >> $GITHUB_ENV
+          elif [ "${{ github.event.workflow.name }}" == "PyTest self-hosted" ]; then
+            echo "ARTIFACT_NAME=pytest-report-selfhosted" >> $GITHUB_ENV
+            echo "UNIQUE_ID=selfhosted" >> $GITHUB_ENV
+          fi
+      # Depending on the triggered event there would be two different
+      # ways to discover the PR number
+      - name: Is this triggered by pull_reqeust
+        id: workflow-trigger
+        run: |
+          echo "is_pr=${{ github.event.workflow_run.event == 'pull_request' }}" \
+          >> "${GITHUB_OUTPUT}"
+
       # download artifacts from the test job in the pytest.yml workflow
+      - name: Workflow name
+        run: echo "Triggered by ${{ github.event.workflow_run.name }}"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Get PR context'
+        if: ${{ steps.workflow-trigger.is_pr }}
+        id: pr-context
+        env:
+          # Token required for GH CLI:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Best practice for scripts is to reference via ENV at runtime. Avoid using the expression syntax in the script content directly:
+          PR_TARGET_REPO: ${{ github.repository }}
+          # If the PR is from a fork, prefix it with `<owner-login>:`, otherwise only the PR branch name is relevant:
+          PR_BRANCH: |-
+            ${{
+              (github.event.workflow_run.head_repository.owner.login != github.event.workflow_run.repository.owner.login)
+                && format('{0}:{1}', github.event.workflow_run.head_repository.owner.login, github.event.workflow_run.head_branch)
+                || github.event.workflow_run.head_branch
+            }}
+        # Query the PR number by repo + branch, then assign to step output:
+        run: |
+          gh pr view --repo "${PR_TARGET_REPO}" "${PR_BRANCH}" \
+              --json 'number' --jq '"number=\(.number)"' \
+              >> "${GITHUB_OUTPUT}"
+
+      - name: Get the PR number for the issue_comment trigger
+        if: ${{ !steps.workflow-trigger.is_pr }}
+        id: comment-context
+        run: |
+          echo "number=${{ github.event.issue.number }}" \
+          >> "${GITHUB_OUTPUT}"
+
+      - name: Post PyTest Coverage Comment
+        id: coverage_comment
+        uses: MishaKav/pytest-coverage-comment@v1.1.53
+        with:
+          title: Coverage report for ${{ github.event.workflow_run.name }}
+          # hide badge and coverage for the self-hosted pytest instance
+          hide-badge: ${{ env.UNIQUE_ID != '' && 'true' || 'false' }}
+          hide-report: true
+          issue-number: ${{ steps.workflow-trigger.is_pr && steps.pr-context.outputs.number || steps.comment-context.outputs.number }}
+          unique-id-for-comment: ${{ env.UNIQUE_ID }}
+          pytest-coverage-path: pytest-coverage.txt
+          junitxml-path: pytest.xml
+
+      - name: Post Failure Comment if Coverage Comment failed
+        # if there is no data the comment action does not fail
+        # but has an empty output
+        if: steps.coverage_comment.outputs.coverageHtml == ''
+        uses: edumserrano/find-create-or-update-comment@v3
+        with:
+          issue-number: ${{ steps.workflow-trigger.is_pr && steps.pr-context.outputs.number || steps.comment-context.outputs.number }}
+          # see https://github.com/MishaKav/pytest-coverage-comment/blob/81882822c5b22af01f91bd3eacb1cefb6ad73dc2/src/index.js#L97
+          # for the generation of the unique id for comment
+          # in this particular case, there is no additional watermarkUniqueId
+          body-includes: "<!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0} ', env.UNIQUE_ID) || '' }}-->"
+          comment-author: 'github-actions[bot]'
+          body: |
+            <!-- Pytest Coverage Comment: ${{ github.job }} ${{ env.UNIQUE_ID != '' && format('| {0} ', env.UNIQUE_ID) || '' }}-->
+            ### :x: PyTest Coverage Report was not found.
+
+            Check the  ${{ github.event.workflow.name }} Workflow.
+          edit-mode: replace
+
+  coverage_report_push_main:
+    name: Coverage report push main
+    if: >-
+      ${{ github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.conclusion != 'cancelled' &&
+          github.event.workflow_run.conclusion != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          name: pytest-report
-
-      # pytest_metadata is set in pytest.yml as A=value\nB=value\n...
-      - name: Set vars from pytest_metadata
-        run: |
-          while IFS= read -r line; do
-            echo "$line" >> $GITHUB_ENV
-          done < pytest_metadata
+          name: pytest-report-mrpro_py312
 
       - name: Post PyTest Coverage Comment
+        id: coverage_comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
         with:
-          issue-number: ${{ env.pr-number }}
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
 
-      - name: Post Failure Comment if Coverage Comment failed
-        if: '!success()'
-        uses: edumserrano/find-create-or-update-comment@v3
+      - name: Psuedo coverage badge
+        run: |
+          echo "message: ${{ steps.coverage_comment.outputs.coverage }}"
+          echo "color: ${{ steps.coverage_comment.outputs.color }}"
+
+      - name: Set Pipeline Status Based on Test Results
+        if: steps.coverage_comment.outputs.errors != 0 || steps.coverage_comment.outputs.failures != 0
+        uses: actions/github-script@v7
         with:
-          issue-number: ${{ env.pr-number }}
-          # see https://github.com/MishaKav/pytest-coverage-comment/blob/81882822c5b22af01f91bd3eacb1cefb6ad73dc2/src/index.js#L97
-          # for the generation of the unique id for comment
-          # in this particular case, there is no additional watermarkUniqueId
-          body-includes: '<!-- Pytest Coverage Comment: ${{ github.job }} -->\n'
-          comment-author: 'github-actions[bot]'
-          body: |
-            PyTest Coverage Report was not found. Check the PyTest Workflow.
-          edit-mode: replace
-
-      # - name: Create Coverage Badge on Main Branch Push
-      #   uses: schneegans/dynamic-badges-action@v1.7.0
-      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      #   with:
-      #     auth: ${{ secrets.GIST_SECRET }}
-      #     gistID: 48e334a10caf60e6708d7c712e56d241
-      #     filename: coverage.json
-      #     label: Coverage Report
-      #     message: ${{ steps.coverageComment.outputs.coverage }}
-      #     color: ${{ steps.coverageComment.outputs.color }}
-      #     namedLogo: python
-
-      # - name: Set Pipeline Status Based on Test Results
-      #   if: steps.coverageComment.outputs.errors != 0 || steps.coverageComment.outputs.failures != 0
-      #   uses: actions/github-script@v7
-      #   with:
-      #     script: |
-      #       core.setFailed("PyTest workflow failed with ${{ steps.coverageComment.outputs.errors }} errors and ${{ steps.coverageComment.outputs.failures }} failures.")
+          script: |
+            core.setFailed("PyTest workflow failed with ${{ steps.coverage_comment.outputs.errors }} errors and ${{ steps.coverage_comment.outputs.failures }} failures.")
