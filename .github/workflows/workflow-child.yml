@@ -20,7 +20,6 @@ jobs:
         run: |
           echo "${{ github.event.workflow_run.event }}"
       - name: Get PR number for the pull_request trigger
-        if: ${{ steps.workflow-trigger.outputs.is_pr }}
         id: pr-context
         env:
           # Token required for GH CLI:
