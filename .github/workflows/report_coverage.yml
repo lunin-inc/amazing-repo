@@ -16,9 +16,10 @@ jobs:
   coverage_report_pr:
     name: Coverage report PR
     if: >-
-      ${{ github.event.workflow_run.event == 'pull_request' &&
+      ${{ (github.event.workflow_run.event == 'pull_request' &&
           github.event.workflow_run.conclusion != 'cancelled' &&
-          github.event.workflow_run.conclusion != 'skipped' }}
+          github.event.workflow_run.conclusion != 'skipped') ||
+          github.event.workflow_run.event == 'issue_comment' }}
     runs-on: ubuntu-latest
     steps:
       - name: Set the artifact name
@@ -31,6 +32,14 @@ jobs:
             echo "ARTIFACT_NAME=pytest-report-selfhosted" >> $GITHUB_ENV
             echo "UNIQUE_ID=selfhosted" >> $GITHUB_ENV
           fi
+      # Depending on the triggered event there would be two different
+      # ways to discover the PR number
+      - name: Is this triggered by pull_reqeust
+        id: workflow-trigger
+        run: |
+          echo "is_pr=${{ github.event.workflow_run.event == 'pull_request' }}" \
+          >> "${GITHUB_OUTPUT}"
+
       # download artifacts from the test job in the pytest.yml workflow
       - name: Workflow name
         run: echo "Triggered by ${{ github.event.workflow_run.name }}"
@@ -43,6 +52,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Get PR context'
+        if: ${{ steps.workflow-trigger.is_pr }}
         id: pr-context
         env:
           # Token required for GH CLI:
@@ -62,6 +72,13 @@ jobs:
               --json 'number' --jq '"number=\(.number)"' \
               >> "${GITHUB_OUTPUT}"
 
+      - name: Get the PR number for the issue_comment trigger
+        if: ${{ !steps.workflow-trigger.is_pr }}
+        id: comment-context
+        run: |
+          echo "number=${{ github.event.issue.number }}" \
+          >> "${GITHUB_OUTPUT}"
+
       - name: Post PyTest Coverage Comment
         id: coverage_comment
         uses: MishaKav/pytest-coverage-comment@v1.1.53
@@ -70,7 +87,7 @@ jobs:
           # hide badge and coverage for the self-hosted pytest instance
           hide-badge: ${{ env.UNIQUE_ID != '' && 'true' || 'false' }}
           hide-report: true
-          issue-number: ${{ steps.pr-context.outputs.number }}
+          issue-number: ${{ steps.workflow-trigger.is_pr && steps.pr-context.outputs.number || steps.comment-context.outputs.number }}
           unique-id-for-comment: ${{ env.UNIQUE_ID }}
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
@@ -81,7 +98,7 @@ jobs:
         if: steps.coverage_comment.outputs.coverageHtml == ''
         uses: edumserrano/find-create-or-update-comment@v3
         with:
-          issue-number: ${{ steps.pr-context.outputs.number }}
+          issue-number: ${{ steps.workflow-trigger.is_pr && steps.pr-context.outputs.number || steps.comment-context.outputs.number }}
           # see https://github.com/MishaKav/pytest-coverage-comment/blob/81882822c5b22af01f91bd3eacb1cefb6ad73dc2/src/index.js#L97
           # for the generation of the unique id for comment
           # in this particular case, there is no additional watermarkUniqueId
