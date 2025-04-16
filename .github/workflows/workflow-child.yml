@@ -19,6 +19,10 @@ jobs:
       - name: Set the artifact name
         run: |
           echo "${{ github.event.workflow_run.event }}"
+      - name: Dump event context
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event.workflow_run) }}
+        run: echo "$GITHUB_EVENT"
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
