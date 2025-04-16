@@ -19,6 +19,10 @@ jobs:
       - name: Set the artifact name
         run: |
           echo "${{ github.event.workflow_run.event }}"
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Get PR number for the pull_request trigger
         id: pr-context
         env:
