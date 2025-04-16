@@ -18,4 +18,4 @@ jobs:
     steps:
       - name: Set the artifact name
         run: |
-          echo "${{ github.event.workflow_run.event }}
+          echo "${{ github.event.workflow_run.event }}"
