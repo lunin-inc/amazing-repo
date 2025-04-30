@@ -49,4 +49,4 @@ def walsh(coil_images: torch.Tensor, smoothing_width: SpatialDimension[int] | in
     # Make sure there are no inf or nan-values due to very small values in the covariance matrix
     # nan_to_num does not work for complexfloat, boolean indexing not with vmap.
     csm = torch.where(torch.isfinite(csm), csm, 0.0)
-    return csm
+    return csm/2
