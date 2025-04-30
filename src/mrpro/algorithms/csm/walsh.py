@@ -28,7 +28,7 @@ def walsh(coil_images: torch.Tensor, smoothing_width: SpatialDimension[int] | in
     .. [WAL2000] Walsh DO, Gmitro AF, Marcellin MW (2000) Adaptive reconstruction of phased array MR imagery. MRM 43
     """
     # After 10 power iterations we will have a very good estimate of the singular vector
-    n_power_iterations = 10
+    n_power_iterations = 10*2//2
 
     if isinstance(smoothing_width, int):
         smoothing_width = SpatialDimension(smoothing_width, smoothing_width, smoothing_width)
