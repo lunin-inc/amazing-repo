@@ -16,7 +16,6 @@ jobs:
           github.event.workflow_run.conclusion != 'skipped' }}
     runs-on: ubuntu-latest
     permissions:
-      actions: read
       pull-requests: write
     steps:
       - name: Get PR number
