@@ -15,9 +15,9 @@ jobs:
           github.event.workflow_run.conclusion != 'cancelled' &&
           github.event.workflow_run.conclusion != 'skipped' }}
     runs-on: ubuntu-latest
-    # permissions:
+    permissions:
     #   actions: read
-    #   pull-requests: write
+      pull-requests: write
     steps:
       - name: Get PR number
         id: pr-context
