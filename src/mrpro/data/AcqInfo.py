@@ -196,7 +196,7 @@ class AcqInfo(MoveDataMixin):
             data_tensor = tensor(data)
             # Ensure that data is (k1*k2*other, >=1)
             if data_tensor.ndim == 1:
-                data_tensor = data_tensor[:, None]
+                data_tensor = data_tensor[:, None] * 1.
             elif data_tensor.ndim == 0:
                 data_tensor = data_tensor[None, None]
             return data_tensor
